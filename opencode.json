@@ -1,0 +1,12 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "mcp": {
+    "water-things": {
+      "type": "remote",
+      "url": "http://localhost:18080/mcp",
+      "headers": {
+        "Authorization": "Bearer eyJhbGciOiJIUzUxMiJ9.eyJsb2dpbl91c2VyX2tleSI6ImMwYjA4YmM0LTcwNmQtNDg0Ny1iZWMzLTVkZDZiNDc2ODkxMSJ9.pChKq5X7Au86C49oQFyJhYl3QWE1C-N34hcmXzQq_kOPjZXZCcxzLtSDmsWLeG28fCBf0CzrDD4NC9-kkPABkA"
+      }
+    }
+  }
+}
