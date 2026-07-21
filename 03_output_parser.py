@@ -303,7 +303,7 @@ def demo_4_error_handling():
     except OutputParserException:
         # 1. 提取可能的 JSON 部分
         text = raw_response.content
-        match = re.search(r'\{.*\}', text, re.DOTALL)
+        match = re.search(r'[{].*[}]', text, re.DOTALL)
         if match:
             # 2. 尝试 json.loads
             try:

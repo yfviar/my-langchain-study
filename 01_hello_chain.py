@@ -74,11 +74,14 @@ def demo_1_raw_model():
 
     关键认知:
       ChatOpenAI.invoke() 返回的是 AIMessage 对象，不是字符串！
-      AIMessage 的结构: { content: str, response_metadata: {...}, ... }
       .content 属性才是你想要的文本。
+      .response_metadata 里包含 token 用量、模型名等信息。
 
-    这也是为什么后面需要 StrOutputParser ——
-    它的唯一作用就是提取 .content。
+    两种传输入的方式:
+      传字符串:   简洁，适合单轮简单问答
+                  内部会把字符串转为消息发送（不演示底层行为，只需知道这是快捷写法）
+      传消息列表: 精确，你可以控制每条消息的角色
+                  适合多轮对话、需要 SystemMessage 的场景
     """
     print("=" * 60)
     print("【第一部分】认识 ChatModel 的输入输出")
@@ -93,7 +96,7 @@ def demo_1_raw_model():
         max_completion_tokens=100,
     )
 
-    # 方式一: 传入字符串 —— LangChain 自动包装为 HumanMessage
+    # 方式一: 传入字符串（快捷写法）
     response = model.invoke("用一句话介绍江南的天气")
     print(f"\n[invoke 返回值类型] {type(response).__name__}")
     print(f"[response 是 AIMessage 吗?] {isinstance(response, AIMessage)}")
@@ -203,19 +206,14 @@ def demo_3_prompt_template():
 def demo_4_output_parser():
     """
     回顾: model.invoke() 返回 AIMessage, 不是 str。
-    如果你直接在 chain 里用 model 的输出作为下一个环节的输入，
-    会得到一个 AIMessage 对象而不是纯文本。
+    如果你直接把 AIMessage 传给下游代码当字符串用，会出问题。
 
-    StrOutputParser 的作用就一件事: 提取 .content 属性。
+    StrOutputParser 的作用:
+      1. 对 AIMessage: 提取 .content，再 strip 空白
+      2. 对纯字符串: 直接 strip 后返回（幂等，可安全重复调用）
+      3. 对流式 chunk: 同样提取内容，保证 stream 输出的一致性
 
-    LangChain 还提供了其他 Parser:
-      - JsonOutputParser: 解析 JSON -> dict
-      - PydanticOutputParser: 解析为 Pydantic 对象 (类型安全)
-      - CommaSeparatedListOutputParser: 解析逗号分隔的列表
-      - XMLOutputParser: 解析 XML
-
-    所以 Parser 的本质是: 把模型返回的非结构化内容，
-    转换成下游代码可以直接消费的结构化数据。
+    所以 Parser 就是把模型的原始输出转换成干净、可消费的数据。
     """
     print("=" * 60)
     print("【第四部分】为什么需要 StrOutputParser")
@@ -273,7 +271,7 @@ def demo_5_the_pipe():
     为什么用 | 而不是函数调用？
       1. 声明式: 读代码就能看到完整流程
       2. 可插拔: 中间插入/替换步骤很方便
-      3. 自动类型检查: 前后步骤类型不匹配会报错
+      3. schema 自动推导: chain.input_schema 和 output_schema 由框架自动计算
       4. 统一接口: chain 本身也是 Runnable, 可以用 invoke/stream/batch
     """
     print("=" * 60)
